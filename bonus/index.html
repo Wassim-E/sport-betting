@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Portfolio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1em;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2em auto;
+            padding: 1em;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>My Demo Portfolio</h1>
+    </header>
+    <div class="container">
+        <h2>Welcome to My Page</h2>
+        <p id="demo-text">This is a simple demo page hosted on GitHub Pages!</p>
+        <button onclick="changeColor()">Change Text Color</button>
+    </div>
+    <script>
+        function changeColor() {
+            const text = document.getElementById("demo-text");
+            const colors = ["#ff0000", "#00ff00", "#0000ff", "#ff00ff"];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            text.style.color = randomColor;
+        }
+    </script>
+</body>
+</html>
