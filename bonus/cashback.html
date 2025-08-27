@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Bets Scenario - Sports Betting Bonus Visualizer</title>
+    <title>Cash Cashback Scenario - Sports Betting Bonus Visualizer</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -48,7 +48,7 @@
             color: var(--accent-color);
         }
 
-        .intro, .formulas, .inputs, .notation, .optimality {
+        .intro, .formulas, .inputs, .results, .notation, .optimality {
             background: var(--card-bg);
             padding: 30px;
             border-radius: var(--border-radius);
@@ -131,61 +131,54 @@
     <div class="container">
         <a href="index.html" class="back-link">← Back to Home</a>
         <header>
-            <h1>Free Bets Scenario</h1>
+            <h1>Cash Cashback Scenario</h1>
             <div class="intro">
-                <p>In this scenario, we analyze the hedging strategy for free bets. A free bet allows you to place a bet without risking your own money, but typically only returns the profit if it wins (not the stake). We hedge it with a cash bet on the opposite outcome to lock in a guaranteed profit.</p>
+                <p>In this scenario, we analyze the hedging strategy for a cash cashback bonus. If the first bet (bonus side) loses, the full bet amount is reimbursed in cash, up to a maximum amount. We hedge with a cash bet on the opposite outcome to lock in a guaranteed profit.</p>
             </div>
         </header>
 
         <section class="formulas">
             <h2>Key Formulas</h2>
             <p>The hedge amount \(X\) is calculated to balance the outcomes:</p>
-            \[ c X = (\bar{c} - 1) F \]
+            \[ Xc = F \bar{c} - X \]
             <p>Where \(\bar{c}\) is derived from the expected return \(r\):</p>
-            \[ \bar{c} = \frac{1}{\frac{1}{r} - \frac{1}{c}} = \frac{r c}{c - r} \]
-            <p>The guaranteed profit \(G = (c - 1) X\), and the conversion rate is \(G / F = \frac{(c - 1)(\bar{c} - 1)}{c}\), which we aim to maximize.</p>
+            \[ \bar{c} = \frac{r c}{c - r} \]
+            <p>The guaranteed profit \(G = F (\bar{c} - 1)\), and the conversion rate is \(G / F = \bar{c} - 1 = \frac{r (c - 1)}{c - r}\), which we aim to maximize.</p>
         </section>
 
-        <section class="inputs" style="align-items: center; display: flex; flex-direction: row; gap: 10px;">
-            <div>
-                <h2>Input Parameters</h2>
-                <label>Free Bet Amount (F): <input id="F" type="number" step="0.01" min="0" value="100"></label>
-                <label>Expected Return (r): <input id="r" type="number" step="0.01" min="0.01" max="0.99" value="0.95"></label>
-                <label>Max Cash for Hedge (max X): <input id="maxX" type="number" step="0.01" min="0" value="1000"></label>
-                <button onclick="calculateFreebets()">Calculate and Plot</button>
-            </div>
-            <div class="results" id="results">
-                <!-- Results will be inserted here -->
-            </div>
+        <section class="inputs">
+            <h2>Input Parameters</h2>
+            <label>Maximum Cashback Amount (F): <input id="F" type="number" step="0.01" min="0" value="100"></label>
+            <label>Expected Return (r): <input id="r" type="number" step="0.01" min="0.01" max="0.99" value="0.95"></label>
+            <label>Max Cash for Hedge (max X): <input id="maxX" type="number" step="0.01" min="0" value="1000"></label>
+            <button onclick="calculateCashback()">Calculate and Plot</button>
+        </section>
+
+        <section class="results" id="results">
+            <!-- Results will be inserted here -->
         </section>
 
         <section>
+            <h2>Graph: Conversion Rate and Hedge Amount vs c</h2>
             <canvas id="graph"></canvas>
         </section>
 
-        <section class="optimality" style="margin-top:10px">
+        <section class="optimality">
             <h2>Optimality Analysis</h2>
             <p>There is a direct formula relating the maximum guaranteed profit G to the expected return r:</p>
             \[ G = F \left(1 - \sqrt{\frac{1 - r}{r}}\right)^2 \]
-            <p>This formula gives the highest possible conversion rate for a free bet under the given r, assuming no limit on the hedge amount X. Note that r=1 is theoretically interesting (yielding 100% conversion) but impossible in practice due to platform margins.</p>
-            <h3>Maximum Conversion Rate vs r (0.85 to 0.99)</h3>
+            <p>This formula gives the highest possible conversion rate for a cash cashback under the given r, assuming no limit on the hedge amount X. The graph below shows the maximum conversion rate and the corresponding optimal hedge amount X/F for r from 0.85 to 0.99. Note that r=1 is theoretically interesting (yielding 100% conversion) but impossible in practice due to platform margins.</p>
+            <h3>Maximum Conversion Rate and Optimal X/F vs r</h3>
             <canvas id="optimalityGraph"></canvas>
-            <h3>Proof</h3>
-            <p>Starting with these equations to maximize G(r)</p>
-            \[ (1)~~ \bar{c} = \frac{1}{\frac{1}{r} - \frac{1}{c}} = \frac{r c}{c - r} \]
-            \[ (2)~~ G(r) = max_{c\in r}( (c - 1) X) \]
-            \[ (3)~~ cX = (\bar{c} - 1) F \]
-            <p>This gives the \( \rho=G/F \) that needs to be maximized over c:</p>
-            \[ (4)~~ \rho = \frac{G}{F} = r \frac{c - 1}{c - r} - \frac{c - 1}{c} \]
-            <p>Differentiating then setting to zero gives the optimal c. From there we can easily find the maximum conversion rate.</p>
         </section>
     </div>
 
-    <script>function plotOptimality() {
+    <script>
+        function plotOptimality() {
             let rs = [];
             let rates = [];
             let xfs = [];
-            for (let ri = 0.85; ri <= 0.995; ri += 0.001) {
+            for (let ri = 0.85; ri <= 1; ri += 0.001) {
                 let r = Math.round(ri * 1000) / 1000;
                 let m = 1 / r;
                 let sqrt_term = Math.sqrt((1 - r) / r);
@@ -194,7 +187,7 @@
                 let q = sqrt_term; // Optimal q
                 let c = 1 / p;
                 let barc = 1 / q;
-                let xf = (barc - 1) / c; // X/F = (bar c - 1) / c
+                let xf = barc / (c - 1); // X/F = bar c / (c - 1)
                 rs.push(r);
                 rates.push(rate.toFixed(2));
                 xfs.push(xf.toFixed(2));
@@ -245,7 +238,7 @@
             });
         }
 
-        function calculateFreebets() {
+        function calculateCashback() {
             const F = parseFloat(document.getElementById('F').value);
             const r = parseFloat(document.getElementById('r').value);
             const maxX = parseFloat(document.getElementById('maxX').value);
@@ -273,8 +266,8 @@
                 if (barc_inv <= 0) continue;
                 let barc = 1 / barc_inv;
                 if (barc <= 1) continue;
-                let rate = (c - 1) * (barc - 1) / c;
-                let X_val = F * (barc - 1) / c;
+                let rate = (barc - 1);
+                let X_val = F * barc / (c - 1);
 
                 // For optimal, consider all
                 if (rate > max_rate) {
@@ -307,17 +300,17 @@
                 for (let i = 0; i < 50; i++) {
                     mid = (low + high) / 2;
                     const barc_mid = r * mid / (mid - r);
-                    const X_mid = F * (barc_mid - 1) / mid;
+                    const X_mid = F * barc_mid / (mid - 1);
                     if (X_mid > maxX) {
                         low = mid;
                     } else {
                         high = mid;
                     }
                 }
-                c_constr = low; // Since X decreases with c, for X= maxX at this c
+                c_constr = low;
                 barc_constr = r * c_constr / (c_constr - r);
-                X_constr = F * (barc_constr - 1) / c_constr;
-                rate_constr = (c_constr - 1) * (barc_constr - 1) / c_constr;
+                X_constr = F * barc_constr / (c_constr - 1);
+                rate_constr = barc_constr - 1;
                 G_constr = rate_constr * F;
             }
 
@@ -343,7 +336,7 @@
                 results_html += `<p>The optimal is within your max cash limit.</p>`;
             }
             document.getElementById('results').innerHTML = results_html;
-            MathJax.typeset(); // Re-render MathJax
+            MathJax.typeset();
 
             // Plot
             const ctx = document.getElementById('graph').getContext('2d');
@@ -385,9 +378,7 @@
                             display: true,
                             position: 'right',
                             title: { display: true, text: 'Hedge Amount X ($)' },
-                            grid: {
-                                drawOnChartArea: false
-                            }
+                            grid: { drawOnChartArea: false }
                         }
                     }
                 }
