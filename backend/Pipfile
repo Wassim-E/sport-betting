@@ -9,6 +9,7 @@ djangorestframework = "*"
 django-cors-headers = "*"
 gunicorn = "*"
 python-dotenv = "*"
+requests = "*"
 
 [dev-packages]
 
