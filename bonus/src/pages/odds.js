@@ -15,7 +15,9 @@ export default function OddsPage() {
   const handleGetOdds = async () => {
     const response = await getOdds();
     console.log(response);
-    setOdds(response.data);
+    if (response.data) {
+      setOdds(response.data);
+    }
   };
   useEffect(() => {
     if (odds.length === 0) {

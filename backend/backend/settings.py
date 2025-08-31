@@ -58,8 +58,9 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://wassim-e.github.io",  # Replace with your GitHub Pages URL
-    "http://localhost:3000",  # For local frontend dev
+    "https://wassim-e.github.io",
+    "https://sport-betting-one.vercel.app",
+    "http://localhost:3000"
 ]
 
 REST_FRAMEWORK = {

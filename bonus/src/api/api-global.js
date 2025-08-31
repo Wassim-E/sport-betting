@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_DJANGO_API_URL || "https://sport-betting.onrender.com",
+  baseURL: process.env.NEXT_PUBLIC_DJANGO_API_URL,
 });
 
 // Interceptor for request: attach the token if it exists
