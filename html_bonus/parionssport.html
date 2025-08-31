@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Odds Fetch - Sports Betting Bonus Visualizer</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --card-bg: #2c2c2c;
+            --text-color: #e0e0e0;
+            --accent-color: #00aaff;
+            --hover-color: #0077cc;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --error-color: #ff4d4d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+        }
+
+        .intro {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .error-message {
+            background: var(--card-bg);
+            padding: 20px;
+            border: 2px solid var(--error-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            color: var(--error-color);
+            text-align: center;
+            display: none;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .back-link:hover {
+            color: var(--hover-color);
+        }
+
+        .bet-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .bet-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+        }
+
+        .bet-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .bet-title {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .bet-detail {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .market-section {
+            margin-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 10px;
+        }
+
+        .market-title {
+            font-size: 1.2rem;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .outcome-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .outcome {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .outcome-price {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .outcome-suspended {
+            color: var(--error-color);
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .bet-card {
+                padding: 15px;
+            }
+
+            .outcome-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="public/apicall.js"></script>
+</head>
+<body onload="fetchLiveOdds(displayBets)">
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Home</a>
+        <header>
+            <h1>Live Odds Fetch</h1>
+            <div class="intro">
+                <p>Explore live odds from the ParionsSport API, updated in real-time. Analyze betting markets and outcomes to strategize for sports betting bonuses.</p>
+                <p><strong>Note:</strong> If the API call fails due to CORS, a proxy server (e.g., hosted on Render or Vercel) is required. Check the console for details.</p>
+            </div>
+        </header>
+        <div class="bet-container" id="betContainer"></div>
+    </div>
+
+    <script>
+
+        function displayBets(bets) {
+            const container = document.getElementById('betContainer');
+            container.innerHTML = ''; // Clear existing content
+
+            if (!bets || bets.length === 0) {
+                container.innerHTML = '<p>No bets available at this time.</p>';
+                return;
+            }
+
+            bets.forEach(bet => {
+                const card = document.createElement('div');
+                card.className = 'bet-card';
+
+                // Event Title and Details
+                const title = document.createElement('div');
+                title.className = 'bet-title';
+                title.textContent = `${bet.team_a} vs ${bet.team_b} (${bet.code})`;
+
+                const details = document.createElement('div');
+                details.innerHTML = `
+                    <div class="bet-detail">League: ${bet.path.league || 'N/A'}</div>
+                    <div class="bet-detail">Start: ${bet.start_datetime}</div>
+                    <div class="bet-detail">Score: ${bet.score.a || 0} - ${bet.score.b || 0}</div>
+                    <div class="bet-detail">Period: ${bet.period.desc || 'N/A'}</div>
+                    <div class="bet-detail">Status: ${bet.time.status === 5 ? 'Live' : 'Scheduled'}</div>
+                `;
+
+                // Markets and Outcomes
+                const markets = document.createElement('div');
+                bet.markets.forEach(market => {
+                    const marketSection = document.createElement('div');
+                    marketSection.className = 'market-section';
+
+                    const marketTitle = document.createElement('div');
+                    marketTitle.className = 'market-title';
+                    marketTitle.textContent = `${market.description} (${market.period})`;
+
+                    const outcomeList = document.createElement('div');
+                    outcomeList.className = 'outcome-list';
+
+                    market.outcomes.forEach(outcome => {
+                        const outcomeDiv = document.createElement('div');
+                        outcomeDiv.className = 'outcome';
+                        const isSuspended = outcome.flags.includes('suspended');
+                        outcomeDiv.innerHTML = `
+                            <div>${outcome.description}</div>
+                            <div class="outcome-price">${isSuspended ? 'Suspended' : outcome.price}</div>
+                        `;
+                        if (isSuspended) {
+                            outcomeDiv.classList.add('outcome-suspended');
+                        }
+                        outcomeList.appendChild(outcomeDiv);
+                    });
+
+                    marketSection.appendChild(marketTitle);
+                    marketSection.appendChild(outcomeList);
+                    markets.appendChild(marketSection);
+                });
+
+                card.appendChild(title);
+                card.appendChild(details);
+                card.appendChild(markets);
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+</html>
